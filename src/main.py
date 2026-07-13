@@ -3,6 +3,7 @@ from data_loader import load_payment_experiment_data
 from metrics_calculator import calculate_group_metrics, format_metrics_for_display
 from experiment_analyzer import compare_group_metrics
 
+# 定义好要比较的指标
 
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
@@ -16,7 +17,7 @@ def main() -> None:
     print("支付实验各组核心指标：")
     print(display_metrics)
     print("下面计算差异")
-    comparison = compare_group_metrics(metrics)
+    comparison = compare_group_metrics(metrics)  #调用compare_group_metrics计算组间差异
     print("组间差异比较：")
     print(comparison)
 
