@@ -2,6 +2,7 @@ from pathlib import Path
 from data_loader import load_payment_experiment_data
 from metrics_calculator import calculate_group_metrics, format_metrics_for_display
 
+
 def main() -> None:
     project_root = Path(__file__).resolve().parents[1]
     data_path = project_root / "data" / "payment_ab_experiment_100k.csv"
@@ -13,6 +14,7 @@ def main() -> None:
     display_metrics = format_metrics_for_display(metrics)  #调用format_metrics_for_display格式化指标以便在控制台显示
     print("支付实验各组核心指标：")
     print(display_metrics)
+
 
 if __name__ == "__main__":
     main()
