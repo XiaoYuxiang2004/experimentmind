@@ -7,6 +7,8 @@ from business_rules import validate_payment_business_rules
 from data_validator import validate_payment_experiment_data
 from data_validator import validate_payment_experiment_columns
 
+from metrics_calculator import (calculate_group_metrics, format_metrics_for_display)
+
 DATE_COLUMNS = ("assigned_at", "first_exposure_at")
 DATE_PARSE_FORMAT = "%Y-%m-%d %H:%M:%S"
 NUMERIC_COLUMNS = (
@@ -100,33 +102,16 @@ def load_payment_experiment_data(
 # 再打印摘要
 def print_basic_summary(data: pd.DataFrame) -> None:
     """打印支付实验数据的基础摘要。"""
-    print("支付实验数据读取、校验并分析成功。")
+    metrics = calculate_group_metrics(data)  # 计算各组指标
+    display_metrics = format_metrics_for_display(metrics) # 格式化指标以便在控制台显示
+    print("\n支付实验各组核心指标：")
+    print(display_metrics)
 
-    print("\n各实验组用户数：")
-    print(data.groupby("group").size())
-
-    print("\n各实验组支付漏斗原子指标：")
-    group_summary = data.groupby("group").agg(
-        users=("user_id", "nunique"),  # 计算唯一用户数
-        assigned_users=("user_id", "size"),
-        exposed_users=("exposed", "sum"),
-        total_exposure_count=("exposure_count", "sum"),
-        attempted_users=("attempted", "sum"),
-        total_attempt_count=("attempt_count", "sum"),
-        paid_users=("paid", "sum"),
-        total_payment_amount=("payment_amount", "sum"),
-        refunded_users=("refunded", "sum"),
-        total_refund_amount=("refund_amount", "sum"),
-        avg_payment_latency_ms=("payment_latency_ms", "mean"),
-        new_users=("new_user", "sum"),
-    )
-
-    print(group_summary)
 
 
 if __name__ == "__main__":
     project_root = Path(__file__).resolve().parents[1]   # 获取项目根目录
-    data_path = project_root / "data" / "sample_payment_experiment.csv"
+    data_path = project_root / "data" / "payment_ab_experiment_100k.csv"  # 数据文件路径
 
-    experiment_data = load_payment_experiment_data(data_path)
+    experiment_data = load_payment_experiment_data(data_path)  # 加载并验证数据
     print_basic_summary(experiment_data)
