@@ -5,6 +5,7 @@ from pandas.errors import EmptyDataError
 
 from business_rules import validate_payment_business_rules
 from data_validator import validate_payment_experiment_data
+from data_validator import validate_payment_experiment_columns
 
 DATE_COLUMNS = ("assigned_at", "first_exposure_at")
 DATE_PARSE_FORMAT = "%Y-%m-%d %H:%M:%S"
@@ -82,10 +83,12 @@ def load_payment_experiment_data(
     if data.empty:
         raise ValueError("实验数据只有表头，没有用户记录。")
 
-    validate_payment_experiment_data(data)
+    validate_payment_experiment_columns(data)
+
 
     data = _coerce_datetime_columns(data)
     data = _coerce_numeric_columns(data)
+    validate_payment_experiment_data(data)
 
     validate_payment_business_rules(data)
 
