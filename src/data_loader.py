@@ -3,7 +3,63 @@ from pathlib import Path
 import pandas as pd
 from pandas.errors import EmptyDataError
 
+from business_rules import validate_payment_business_rules
 from data_validator import validate_payment_experiment_data
+
+DATE_COLUMNS = ("assigned_at", "first_exposure_at")
+DATE_PARSE_FORMAT = "%Y-%m-%d %H:%M:%S"
+NUMERIC_COLUMNS = (
+    "exposed",
+    "exposure_count",
+    "attempted",
+    "attempt_count",
+    "paid",
+    "payment_amount",
+    "refunded",
+    "refund_amount",
+    "payment_latency_ms",
+    "new_user",
+)
+
+
+def _coerce_datetime_columns(data: pd.DataFrame) -> pd.DataFrame:
+    """
+    将日期字段转换为 datetime 类型，并检查是否存在无法解析的值。
+    """
+    for column in DATE_COLUMNS:
+        original_values = data[column]
+        converted_values = pd.to_datetime(
+            original_values,
+            errors="coerce",
+            format=DATE_PARSE_FORMAT,
+        )
+
+        invalid_mask = original_values.notna() & converted_values.isna()
+        if invalid_mask.any():
+            invalid_values = original_values.loc[invalid_mask].drop_duplicates().tolist()
+            raise ValueError(f"日期字段 {column} 存在无法解析的值：{invalid_values}")
+
+        data[column] = converted_values
+
+    return data
+
+
+def _coerce_numeric_columns(data: pd.DataFrame) -> pd.DataFrame:
+    '''
+    将数值字段转换为数值类型，并检查是否存在无法解析的值。
+    '''
+    for column in NUMERIC_COLUMNS:
+        original_values = data[column]
+        converted_values = pd.to_numeric(original_values, errors="coerce")
+
+        invalid_mask = original_values.notna() & converted_values.isna()
+        if invalid_mask.any():
+            invalid_values = original_values.loc[invalid_mask].drop_duplicates().tolist()
+            raise ValueError(f"数值字段 {column} 存在无法解析的值：{invalid_values}")
+
+        data[column] = converted_values
+
+    return data
 
 # 先检查
 def load_payment_experiment_data(
@@ -28,13 +84,20 @@ def load_payment_experiment_data(
 
     validate_payment_experiment_data(data)
 
+    data = _coerce_datetime_columns(data)
+    data = _coerce_numeric_columns(data)
+
+    validate_payment_business_rules(data)
+
+    print("支付实验数据基础校验和业务规则检查均已通过。")
+
     return data
 
 
 # 再打印摘要
 def print_basic_summary(data: pd.DataFrame) -> None:
     """打印支付实验数据的基础摘要。"""
-    print("支付实验数据读取并验证成功！")  #因为 validate_payment_experiment_data 函数会抛出异常，所以如果执行到这里，说明数据是有效的。
+    print("支付实验数据读取、校验并分析成功。")
 
     print("\n各实验组用户数：")
     print(data.groupby("group").size())

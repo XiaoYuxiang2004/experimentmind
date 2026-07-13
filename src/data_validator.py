@@ -26,6 +26,7 @@ REQUIRED_PAYMENT_EXPERIMENT_COLUMNS = (
 # 允许为空的字段：用户未曝光时没有首曝光时间
 OPTIONAL_NULLABLE_COLUMNS = (
     "first_exposure_at",
+    "payment_latency_ms" # 用户未支付时没有支付延迟
 )
 
 # 这些字段在当前数据口径下必须有值
