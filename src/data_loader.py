@@ -34,24 +34,25 @@ def load_payment_experiment_data(
 # 再打印摘要
 def print_basic_summary(data: pd.DataFrame) -> None:
     """打印支付实验数据的基础摘要。"""
-    print("支付实验数据读取并验证成功！")
-    print(f"总记录数：{len(data)}")
-    print(f"唯一用户数：{data['user_id'].nunique()}")
-    print(f"字段数量：{data.shape[1]}")
-    print(f"字段列表：{data.columns.tolist()}")
+    print("支付实验数据读取并验证成功！")  #因为 validate_payment_experiment_data 函数会抛出异常，所以如果执行到这里，说明数据是有效的。
 
     print("\n各实验组用户数：")
     print(data.groupby("group").size())
 
     print("\n各实验组支付漏斗原子指标：")
     group_summary = data.groupby("group").agg(
-        users=("user_id", "nunique"),
+        users=("user_id", "nunique"),  # 计算唯一用户数
+        assigned_users=("user_id", "size"),
         exposed_users=("exposed", "sum"),
+        total_exposure_count=("exposure_count", "sum"),
         attempted_users=("attempted", "sum"),
+        total_attempt_count=("attempt_count", "sum"),
         paid_users=("paid", "sum"),
         total_payment_amount=("payment_amount", "sum"),
         refunded_users=("refunded", "sum"),
         total_refund_amount=("refund_amount", "sum"),
+        avg_payment_latency_ms=("payment_latency_ms", "mean"),
+        new_users=("new_user", "sum"),
     )
 
     print(group_summary)

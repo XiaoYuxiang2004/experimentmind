@@ -8,8 +8,12 @@ import pandas as pd
 REQUIRED_PAYMENT_EXPERIMENT_COLUMNS = (
     "user_id",
     "group",
+    "assigned_at",
     "exposed",
+    "exposure_count",
+    "first_exposure_at",
     "attempted",
+    "attempt_count",
     "paid",
     "payment_amount",
     "refunded",
@@ -17,6 +21,18 @@ REQUIRED_PAYMENT_EXPERIMENT_COLUMNS = (
     "payment_latency_ms",
     "device",
     "new_user",
+)
+
+# 允许为空的字段：用户未曝光时没有首曝光时间
+OPTIONAL_NULLABLE_COLUMNS = (
+    "first_exposure_at",
+)
+
+# 这些字段在当前数据口径下必须有值
+REQUIRED_NON_NULL_COLUMNS = tuple(
+    column
+    for column in REQUIRED_PAYMENT_EXPERIMENT_COLUMNS
+    if column not in OPTIONAL_NULLABLE_COLUMNS
 )
 
 # 支付实验数据的二元字段
@@ -28,7 +44,7 @@ BINARY_COLUMNS = (
     "new_user",
 )
 
-EXPECTED_GROUPS = frozenset({"A", "B"})
+EXPECTED_GROUPS = frozenset({"A", "B"})  # 实验分组的期望值
 
 
 def validate_payment_experiment_columns(
@@ -48,7 +64,7 @@ def validate_payment_experiment_columns(
 
 def validate_required_values_not_missing(
     data: pd.DataFrame,
-    required_columns: Iterable[str] = REQUIRED_PAYMENT_EXPERIMENT_COLUMNS,
+    required_columns: Iterable[str] = REQUIRED_NON_NULL_COLUMNS,  # 这里剔除了 first_exposure_at，因为它在用户未曝光时可以为空
 ) -> None:
     """确保必要字段中没有缺失值。"""
     columns = list(required_columns)
