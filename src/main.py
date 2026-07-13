@@ -1,6 +1,7 @@
 from pathlib import Path
 from data_loader import load_payment_experiment_data
 from metrics_calculator import calculate_group_metrics, format_metrics_for_display
+from experiment_analyzer import compare_group_metrics
 
 
 def main() -> None:
@@ -14,7 +15,10 @@ def main() -> None:
     display_metrics = format_metrics_for_display(metrics)  #调用format_metrics_for_display格式化指标以便在控制台显示
     print("支付实验各组核心指标：")
     print(display_metrics)
-
+    print("下面计算差异")
+    comparison = compare_group_metrics(metrics)
+    print("组间差异比较：")
+    print(comparison)
 
 if __name__ == "__main__":
     main()
