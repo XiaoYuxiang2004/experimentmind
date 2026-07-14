@@ -83,7 +83,7 @@ def generate_payment_experiment_report(
     """
     api_key = os.getenv("DASHSCOPE_API_KEY")
     base_url = "https://ws-1p313dodlakx5z4u.cn-beijing.maas.aliyuncs.com/compatible-mode/v1"
-    model = "qwen-plus"
+    model = "qwen3.7-max"
 
     if not api_key:
         raise ValueError(
